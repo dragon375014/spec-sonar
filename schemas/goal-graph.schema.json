@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "spec-sonar goal-graph",
+  "type": "object",
+  "required": ["schema_version", "project", "goals", "execution_plan"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "project": {
+      "type": "object",
+      "required": ["name", "source_spec", "mode", "generated_at"],
+      "properties": {
+        "name": { "type": "string" },
+        "source_spec": { "type": "string" },
+        "mode": { "enum": ["from-zero", "audit", "complex-system"] },
+        "complexity": { "enum": ["mvp", "full", "enterprise", null] },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "file", "title", "version", "consumers"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^C[0-9]+$" },
+          "file": { "type": "string" },
+          "title": { "type": "string" },
+          "version": { "type": "string" },
+          "consumers": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "goals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "file", "model_tier", "status", "depends_on"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^G[0-9]+[a-z]?$" },
+          "title": { "type": "string" },
+          "module_ref": { "type": "string" },
+          "file": { "type": "string" },
+          "model_tier": { "enum": ["haiku", "sonnet", "opus"] },
+          "tier_condition": { "type": "string" },
+          "status": { "enum": ["pending", "ready", "in-progress", "blocked", "done", "verified"] },
+          "acceptance_count": { "type": "integer", "minimum": 1 },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["ref", "type", "confidence", "evidence"],
+              "properties": {
+                "ref": { "type": "string", "pattern": "^[GC][0-9]+[a-z]?$" },
+                "type": { "enum": ["data", "api", "state", "ui", "contract", "phase"] },
+                "confidence": { "enum": ["explicit", "inferred", "confirmed"] },
+                "evidence": { "type": "string", "maxLength": 120 }
+              }
+            }
+          },
+          "produces": { "type": "array", "items": { "type": "string" } },
+          "verification": {
+            "type": "object",
+            "properties": {
+              "method": { "type": "string" },
+              "commands": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "execution_plan": {
+      "type": "object",
+      "required": ["batches"],
+      "properties": {
+        "batches": {
+          "type": "array",
+          "items": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

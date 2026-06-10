@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "mathdefense",
+    "source_spec": "spec/project-spec.md",
+    "mode": "from-zero",
+    "complexity": "full",
+    "generated_at": "2026-06-10T00:00:00Z"
+  },
+  "contracts": [
+    { "id": "C1", "file": "spec/contracts/C1-socket-events.md",
+      "title": "Socket 事件與 payload 凍結表", "version": "1.0",
+      "consumers": ["G1", "G2", "G3", "G4a", "G4b", "G5", "G6"] },
+    { "id": "C2", "file": "spec/contracts/C2-unit-stats.md",
+      "title": "單位數值表（HP/攻擊/射程/速度/向日葵歸屬裁決）", "version": "1.0",
+      "consumers": ["G3", "G6"] }
+  ],
+  "goals": [
+    { "id": "G1", "title": "房間系統", "module_ref": "模組一",
+      "file": "spec/goals/G1.md", "model_tier": "sonnet", "status": "ready",
+      "acceptance_count": 5,
+      "depends_on": [
+        { "ref": "C1", "type": "contract", "confidence": "explicit",
+          "evidence": "room:join 事件與 token 格式定義於 C1" } ],
+      "produces": ["POST /api/room/create", "POST /api/room/join", "GameRoom 實體"],
+      "verification": { "method": "API 整合測試", "commands": ["node test/room.test.js"] } },
+
+    { "id": "G2", "title": "題庫與答題引擎", "module_ref": "模組二",
+      "file": "spec/goals/G2.md", "model_tier": "sonnet", "status": "pending",
+      "acceptance_count": 6,
+      "depends_on": [
+        { "ref": "G1", "type": "data", "confidence": "explicit",
+          "evidence": "題目分配給已加入房間的 Player" } ],
+      "produces": ["questions 資料表", "question:next 流程", "Player.resources 增減"],
+      "verification": { "method": "答題流程腳本", "commands": ["node test/quiz.test.js"] } },
+
+    { "id": "G4a", "title": "Socket 基礎連線與重連", "module_ref": "模組四(基礎)",
+      "file": "spec/goals/G4a.md", "model_tier": "opus", "status": "pending",
+      "acceptance_count": 4,
+      "depends_on": [
+        { "ref": "G1", "type": "api", "confidence": "explicit",
+          "evidence": "開發順序建議：先模組一+模組四基礎連線" },
+        { "ref": "C1", "type": "contract", "confidence": "explicit",
+          "evidence": "全部事件名與 payload 凍結於 C1" } ],
+      "produces": ["room 廣播骨架", "sessionToken 重連機制", "game:state 全量同步"],
+      "verification": { "method": "雙 client 一致性測試",
+        "commands": ["node test/g4a-consistency.test.js", "node test/g4a-reconnect.test.js"] } },
+
+    { "id": "G3", "title": "遊戲引擎（地圖+攻防）", "module_ref": "模組三",
+      "file": "spec/goals/G3.md", "model_tier": "opus", "status": "pending",
+      "acceptance_count": 7,
+      "depends_on": [
+        { "ref": "G2", "type": "state", "confidence": "explicit",
+          "evidence": "部署消耗 Player.resources（答題產生）" },
+        { "ref": "G4a", "type": "api", "confidence": "explicit",
+          "evidence": "unit:deploy 經 socket 送達後端驗證" },
+        { "ref": "C2", "type": "contract", "confidence": "explicit",
+          "evidence": "單位數值與向日葵歸屬取自 C2" } ],
+      "produces": ["Phaser 地圖渲染", "部署/攻擊/移動邏輯", "unit:* 事件觸發源"],
+      "verification": { "method": "遊戲邏輯單元測試 + FPS 監控",
+        "commands": ["node test/engine.test.js"] } },
+
+    { "id": "G4b", "title": "即時同步完整版", "module_ref": "模組四(完整)",
+      "file": "spec/goals/G4b.md", "model_tier": "opus", "status": "pending",
+      "acceptance_count": 5,
+      "depends_on": [
+        { "ref": "G4a", "type": "phase", "confidence": "explicit",
+          "evidence": "同模組 phase 切割" },
+        { "ref": "G3", "type": "api", "confidence": "explicit",
+          "evidence": "廣播 unit:placed/removed/attacked、zombie:moved" } ],
+      "produces": ["300ms 同步保證", "延遲提示", "五事件廣播"],
+      "verification": { "method": "延遲量測腳本（50 次取 p95）",
+        "commands": ["node test/g4b-latency.test.js"] } },
+
+    { "id": "G5", "title": "老師控制台", "module_ref": "模組五",
+      "file": "spec/goals/G5.md", "model_tier": "haiku",
+      "tier_condition": "C1 已凍結且 G4a verified，否則升 sonnet",
+      "status": "pending", "acceptance_count": 6,
+      "depends_on": [
+        { "ref": "G4a", "type": "api", "confidence": "explicit",
+          "evidence": "基於已有 Socket 事件擴充" },
+        { "ref": "G2", "type": "data", "confidence": "inferred",
+          "evidence": "顯示答對率/答對數需 Player 答題統計" } ],
+      "produces": ["/teacher/:roomCode 數據面板", "game:pause/resume 控制"],
+      "verification": { "method": "控制台操作腳本",
+        "commands": ["node test/teacher.test.js"] } },
+
+    { "id": "G6", "title": "勝負判定與結束報告", "module_ref": "模組六",
+      "file": "spec/goals/G6.md", "model_tier": "sonnet", "status": "pending",
+      "acceptance_count": 5,
+      "depends_on": [
+        { "ref": "G3", "type": "state", "confidence": "explicit",
+          "evidence": "偵測殭屍 x≤0 與剩餘 HP 總量" },
+        { "ref": "G4b", "type": "api", "confidence": "explicit",
+          "evidence": "game:end 廣播" },
+        { "ref": "G2", "type": "data", "confidence": "explicit",
+          "evidence": "報告含答對率與答錯率最高 3 題" } ],
+      "produces": ["game:end 判定", "結束報告頁", "@media print 樣式"],
+      "verification": { "method": "勝負情境測試 + 列印樣式人工檢查",
+        "commands": ["node test/endgame.test.js"] } }
+  ],
+  "execution_plan": {
+    "batches": [ ["G1"], ["G2", "G4a"], ["G3", "G5"], ["G4b"], ["G6"] ]
+  }
+}

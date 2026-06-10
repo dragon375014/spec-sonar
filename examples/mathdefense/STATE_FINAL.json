@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-06-10T00:00:00Z",
+  "round": 6,
+  "lang": "zh-TW",
+  "user_tech_level": "none+partner",
+  "bright": [
+    "產品類型：課堂即時多人塔防數學遊戲",
+    "目標用戶：國中學生（植物隊 vs 殭屍隊）+ 老師",
+    "科目：國中數學，系統內建題庫，老師選單元",
+    "裝置：平板瀏覽器，人手一台，課堂內使用",
+    "遊戲靈感：Plants vs Zombies 塔防機制（原創美術）",
+    "資源系統：個人賺、個人花（答對 → 陽光或黑暗能量）",
+    "單位冷卻：每種單位有獨立冷卻時間",
+    "植物隊機制：陽光 → 格子種植物，固定不動，自動攻擊",
+    "殭屍隊機制：黑暗能量 → 召喚殭屍，自動移動推進",
+    "格子制地圖（9×5）",
+    "畫面呈現：每台平板顯示完整即時地圖",
+    "答題機制：個人獨立答題，資源歸個人",
+    "加入方式：房間代碼 OR QR Code，不需要帳號，輸入名字即可",
+    "分組方式：學生自選隊伍，系統自動平衡人數",
+    "勝負條件：殭屍突破底線 OR 時間到看存活狀態",
+    "時長：彈性，老師控制",
+    "老師角色：即時儀表板（答對率）+ 控制權（暫停、調難度、強制結束）",
+    "遊戲結束報告：個人成績表 + 全班統計摘要",
+    "無帳號系統：遊戲資料不持久化"
+  ],
+  "dark": [],
+  "complexity": "full",
+  "duplicate_check": "done-unique",
+  "infeasible_flag": false,
+  "next_focus": null,
+  "tech_stack": {
+    "game_engine": "Phaser.js 3",
+    "realtime": "Socket.io",
+    "backend": "Node.js + Express",
+    "database": "Supabase (PostgreSQL)",
+    "session_state": "後端記憶體 Map（Redis 可選）",
+    "deployment": "Railway 或 Render",
+    "qrcode": "qrcode npm 套件"
+  },
+  "known_risks": [
+    "學校 WiFi 穩定性需實測",
+    "低階 Android 平板 Phaser.js 效能",
+    "後端記憶體 Session 不耐伺服器重啟",
+    "題庫建置是非技術工作，需提前準備"
+  ],
+  "resume_instruction": "把這份 JSON 貼到新 session 的第一則訊息，系統會從這裡繼續。dark 已清零，可直接進入實作階段。"
+}
