@@ -92,6 +92,13 @@ examples/
 
 A real classroom multiplayer tower-defense math game, converged from a vague idea through 6 rounds into a full spec, then decomposed into 7 goals + 2 contracts across 5 execution batches. The audit of its own output caught three genuine spec holes (missing unit stats, an undefined zombie movement model, and a reconnect-identity requirement that collided with the "no accounts" rule) — see [docs/review-findings.md](docs/review-findings.md).
 
+## Ecosystem
+
+spec-sonar is the **converge + decompose layer** (Layers 1–2 above) of a five-repo AI-dev toolchain — full map: [ai-dev-toolkit/ECOSYSTEM.md](https://github.com/dragon375014/ai-dev-toolkit/blob/main/ECOSYSTEM.md).
+
+- **Downstream** — [`goal-workflow-designer`](https://github.com/dragon375014/goal-workflow-designer) owns the single-task shaping axis: its `goal` skill defines the five-element goal format this repo's goal files reuse, and its `workflow-shaper` handles homogeneous fan-out (the same check across N units), which is out of scope here.
+- **At execution time** — [`claude-skills-governance-meta`](https://github.com/dragon375014/claude-skills-governance-meta) guards the code executor models write; [`agent-work-board`](https://github.com/dragon375014/agent-work-board) coordinates parallel executor sessions.
+
 ## Language note
 
 The skill instruction files are currently authored in **Traditional Chinese**. This does not limit usage: Claude follows the skill logic regardless of conversation language and responds in *your* language (the STATE carries a `lang` field). English-native skill files are on the roadmap — contributions welcome.
