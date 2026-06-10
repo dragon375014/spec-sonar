@@ -94,7 +94,7 @@ A real classroom multiplayer tower-defense math game, converged from a vague ide
 
 ## Ecosystem
 
-spec-sonar is the **converge + decompose layer** (Layers 1–2 above) of a five-repo AI-dev toolchain — full map: [ai-dev-toolkit/ECOSYSTEM.md](https://github.com/dragon375014/ai-dev-toolkit/blob/main/ECOSYSTEM.md).
+spec-sonar is the **converge + decompose layer** (Layers 1–2 above) of a six-repo AI-dev toolchain — full map: [ai-dev-toolkit/ECOSYSTEM.md](https://github.com/dragon375014/ai-dev-toolkit/blob/HEAD/ECOSYSTEM.md).
 
 - **Downstream** — [`goal-workflow-designer`](https://github.com/dragon375014/goal-workflow-designer) owns the single-task shaping axis: its `goal` skill defines the five-element goal format this repo's goal files reuse, and its `workflow-shaper` handles homogeneous fan-out (the same check across N units), which is out of scope here.
 - **At execution time** — [`claude-skills-governance-meta`](https://github.com/dragon375014/claude-skills-governance-meta) guards the code executor models write; [`agent-work-board`](https://github.com/dragon375014/agent-work-board) coordinates parallel executor sessions.
