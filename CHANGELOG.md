@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0] - 2026-06-12
+
+### Added
+- `skills/idea-to-spec` — step 7-3 boundary scan + contradiction scan: bright→edge cell enumeration with A/B/C triage; contradiction findings must carry a reconcilable-interpretation field
+- Undetermined-value rule: values the spec never gave are always labelled as assumptions, never asserted as bright facts
+- 11th baseline dimension (user journeys & entry points) in `dark-zone-baseline.md` + journey coverage check; journey section added to the `output-templates.md` CLAUDE.md template
+- Enterprise complexity: external governance SKILL recommendation (link-only, never auto-installed)
+- Handoff gate now also requires `boundary_scan === "done"`
+- `skills/goal-decomposer` — step 7-2 blind audit: a zero-context fresh agent reviews goals/ + contracts/ only; findings must be actioned, not just recorded
+- Wiring-matrix hardening: the emit owner must own the triggering surface; same-cell dual owner = compile error
+- Mandatory structural goals: G0 (app skeleton, first batch) and G-FINAL (journey smoke, last batch); cross-end acceptance criteria split-in-half rule
+- `project_setup` field in `goal-graph.schema.json` + step-6 extraction instructions (account/env pre-flight checklist)
+
 ## [0.1.0] - 2026-06-10
 
 ### Added

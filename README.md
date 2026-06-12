@@ -10,7 +10,7 @@ spec-sonar is an open toolchain that turns vague product ideas into executable, 
 
 AI coding agents rarely fail because they can't write code. They fail because of what nobody wrote down: the unstated requirement, the contradictory constraint, the dimension nobody thought to ask about. spec-sonar attacks that gap directly with three ideas:
 
-1. **Dark-zone detection** — a structured inventory of the dimensions software specs systematically forget (10 baseline dimensions + per-product-type extension packs), driven through a 5–7 round Q&A engine that tracks what is known (*bright*) vs unknown (*dark*).
+1. **Dark-zone detection** — a structured inventory of the dimensions software specs systematically forget (11 baseline dimensions + per-product-type extension packs), driven through a 5–7 round Q&A engine that tracks what is known (*bright*) vs unknown (*dark*).
 2. **Goal compilation** — specs are decomposed into a dependency graph of self-contained goal files. Every design decision is **pre-adjudicated** by the strong model at decomposition time, so weak executor models never have to guess.
 3. **Adapters** — the same spec projects into `CLAUDE.md`, `.cursor/rules`, `copilot-instructions.md`, and a generic system prompt. Write the spec once, run it anywhere.
 
@@ -21,11 +21,17 @@ AI coding agents rarely fail because they can't write code. They fail because of
 │ Layer 1 · idea-to-spec        (skill, done)                 │
 │   vague idea ── 5–7 round Q&A ──► CLAUDE.md + STATE_FINAL   │
 │   dark-zone tracking · conflict protocols · wheel-reinvention check
+│   boundary scan · contradiction scan · undetermined-value rule (step 7-3)
+│   journey coverage check · enterprise governance-SKILL recommendation
+│   handoff requires boundary_scan = done                     │
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 2 · goal-decomposer     (skill, done)                 │
 │   spec ── dependency inference ──► goal-graph.json          │
 │        ── pre-adjudication   ──► goals/G*.md (self-contained)
 │        ── interface freezing ──► contracts/C*.md            │
+│   wiring matrix (orphan interface = compile error)          │
+│   mandatory G0 / G-FINAL structural goals                   │
+│   cross-end acceptance splitting · zero-context blind audit (step 7-2)
 ├─────────────────────────────────────────────────────────────┤
 │ Layer 3 · execution           (any model)                   │
 │   Haiku / Sonnet / Cursor / Copilot / GPT follow the graph  │
@@ -94,12 +100,13 @@ A real classroom multiplayer tower-defense math game, converged from a vague ide
 
 ## Ecosystem
 
-spec-sonar is the **converge + decompose layer** (Layers 1–2) of a six-repo AI-dev toolchain — full map: [ai-dev-toolkit/ECOSYSTEM.md](https://github.com/dragon375014/ai-dev-toolkit/blob/master/ECOSYSTEM.md).
+spec-sonar is the **converge + decompose layer** (Layers 1–2) of an AI-dev toolchain — five public repos plus the author's private cross-project knowledge vault. Full map: [specmit/ECOSYSTEM.md](https://github.com/dragon375014/specmit/blob/main/ECOSYSTEM.md).
 
-**One-command install** (drops all six tools into the right place):
+**One-command install** (drops every tool into the right place):
 ```bash
 npx specmit init
 ```
+Then, in Claude Code, say *"run the pipeline"* (「跑完整管線」) to execute the whole chain.
 
 - **Downstream** — [`goal-workflow-designer`](https://github.com/dragon375014/goal-workflow-designer) owns the single-task shaping axis: its `goal` skill defines the five-element goal format this repo's goal files reuse, and its `workflow-shaper` handles homogeneous fan-out (the same check across N units), which is out of scope here.
 - **At execution time** — [`specmit`](https://github.com/dragon375014/specmit) runs the decomposed goal graph; [`claude-skills-governance-meta`](https://github.com/dragon375014/claude-skills-governance-meta) guards the executor models; [`agent-work-board`](https://github.com/dragon375014/agent-work-board) coordinates parallel sessions.
@@ -114,7 +121,7 @@ The skill instruction files are currently authored in **Traditional Chinese**. T
 - [ ] Eval harness: measure dark-zone coverage and goal cold-start pass rate
 - [ ] Audit Mode and Conflict Analysis Mode packaged as runnable skills
 - [ ] More end-to-end examples (B2B SaaS, marketplace, internal tool)
-- [ ] `goal-graph.json` execution runner (auto-dispatch batches to models)
+- [x] `goal-graph.json` execution runner (auto-dispatch batches to models) — shipped as [specmit](https://github.com/dragon375014/specmit)
 
 ## Contributing
 
