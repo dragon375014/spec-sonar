@@ -1,6 +1,6 @@
 # 輸出範本
 
-<!-- spec-sonar v1.1 — STATE_FINAL 升級至 schema 1.1（正式收編 tech_stack / known_risks / revision_log） -->
+<!-- spec-sonar v1.1 — STATE_FINAL 升級至 schema 1.1（正式收編 tech_stack / known_risks / revision_log）；v1.3 加 CLAUDE.md「UI/UX 規格」章節 + STATE_FINAL modality / ui_states / critical_flow_reversibility（2026-06-20） -->
 
 Handoff 套件的三個檔案格式定義。
 用 STATE_FINAL 的內容填入 `{{ }}` 標記的欄位。
@@ -122,6 +122,24 @@ Handoff 套件的三個檔案格式定義。
 
 ---
 
+## UI/UX 規格（modality = {{ modality }}；螢幕型才填，non-screen 改填對應 modality 規格）
+
+> 把 UX 從「末段順便問」變成驗收條件（來源：dark-zone S1/S2 樁 + Pass 2 `ui_states` / `critical_flow_reversibility` 欄位）。
+
+### 設計系統與視覺一致性（S1）
+- 視覺 SSOT：{{ 既有設計系統 / 品牌 token 指認，或「第一版不強制一致」}}（深色模式：{{ 要 / 不要 }}）
+- 導覽 SSOT（S2）：{{ 桌機/手機導覽是否同一份來源 + 主要導覽元件型態 }}
+
+### 介面狀態（ui_states，每個會有資料的主要畫面）
+- **{{ 畫面 }}**：空狀態＝{{ 文案方向 }}｜載入＝{{ 骨架/轉圈/卡住 }}｜錯誤＝{{ 訊息 + 可否重試 }}{{ 類型 C 才加：｜首次使用＝引導/checklist 與否 }}
+
+### 關鍵流摩擦與可逆性（critical_flow_reversibility，最高頻 1–2 操作）
+- **{{ 操作 }}**：步數＝{{ N }}｜可否取消/回退＝{{ 是/否 }}｜批次逐筆編輯＝{{ 是/否/N.A. }}
+
+> 每條 UI/UX 規格都是驗收條件；handoff 前對「會有資料的主要畫面 × ui_states」與「最高頻操作 × 可逆性」做覆蓋檢查，缺一視為沉默缺口。
+
+---
+
 ## 功能模組（開發順序）
 
 依序實作以下模組，每個模組完成後進行驗收再繼續。
@@ -199,6 +217,7 @@ Handoff 套件的三個檔案格式定義。
   "round": 7,
   "lang": "{{ 語言 }}",
   "user_tech_level": "{{ 等級，複合情境允許 {基準值}+partner }}",
+  "modality": "{{ screen / voice / api / messaging / print }}",
   "bright": [
     { "id": "B1", "claim": "{{ 確立項目 }}", "round": 1, "depends_on": [] }
   ],
@@ -218,6 +237,8 @@ Handoff 套件的三個檔案格式定義。
     "integrations": [ "{{ 清單，可空 }}" ]
   },
   "known_risks": [ "{{ 收斂過程發現的風險 }}" ],
+  "ui_states": [ { "screen": "{{ 畫面 }}", "empty": "{{ 空狀態政策 }}", "loading": "{{ 載入 }}", "error": "{{ 錯誤+可否重試 }}", "first_use": "{{ 類型 C 才填 }}" } ],
+  "critical_flow_reversibility": [ { "flow": "{{ 最高頻操作 }}", "steps": "{{ N }}", "reversible": "{{ 是/否 }}", "batch_edit": "{{ 是/否/NA }}" } ],
   "next_focus": null,
   "resume_instruction": "把這份 JSON 貼到新 session 的第一則訊息，系統會從這裡繼續。"
 }
