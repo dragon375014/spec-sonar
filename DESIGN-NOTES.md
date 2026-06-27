@@ -86,7 +86,7 @@ spec-kit（GitHub 的 spec-driven 開發工具，與本專案近親）在 issue 
 2. **兩層結構**：第一層 M0 modality（已存在，列印在這層）；第二層 archetype 只長在「螢幕」下 = **交易型應用 / 呈現型網站 / 混合**。既有 5 類型包收進「交易型應用」當子類（純加法）。
 3. **判定 = infer-first + 一行確認**：archetype 從 solution_map/前幾輪答案/project-scanner 掃碼**推定**（痛點類別 ≠ archetype，是不同軸），再以 B 類推定句一行確認（猜錯=上線才爆，性質同 M0）。粗類別在 client-facing 端（RequiBridge）即可，深挖子類交執行端。
 4. **呈現型 baseline**：①標準區塊（首頁/關於我/商品服務/內容/聯絡 + 頁尾法務）②可達性對稱律（凡宣告存在的面都要有可抵達入口，含後台）③信任頁是產品不是裝飾。
-5. **三層完備性階梯**：L1 存在 / L2 可達 / **L3 充實**——一個面需要圖/影，就必須同時有**媒體槽**（頁面內圖片/影片區塊）+ **後台填料路徑**（上傳/選圖/儲存）；生成成「一坨文字、沒圖槽、後台無放圖的路」= 不完整。L3 機械可驗（grep 媒體區塊 + admin route），順手修 R3。
+5. **三層完備性階梯**：L1 存在 / L2 可達 / **L3 充實**——一個面需要圖/影，就必須同時有**媒體槽**（頁面內圖片/影片區塊）+ **後台填料路徑**（上傳/選圖/儲存）；生成成「一坨文字、沒圖槽、後台無放圖的路」= 不完整。L3 機械可驗（grep 媒體區塊 + admin route），順手修 R3。**L3 的檢查是「填得進去嗎」三問**（2026-06-27 dogfood 9453americantimetest 修正——只問「有沒有槽」會放過空殼）：(a) 有媒體槽？(b) 有**真**的填料路徑（非 mock 的上傳+儲存+picker）？(c) 槽**實際填了**沒（非全 null）？只過 (a) = 結構齊全、料全空的空殼（9453 實證：有 `PhotoFrame` 槽 + `image_key` 欄 + admin 圖片輸入，但上傳是 mock / r2-sign 501 stub、`image_key` 全 null → 整站空殼 = 它的「前端 10 分」）。
 6. **補全模式（brownfield）= 復用 `tools/project-scanner.py` + Audit Mode**（拿 archetype baseline 當尺差集照出缺/薄的面），specmit 僅加薄編排動詞，**不另造掃描器**（防 D2 雙真相源）。掃描照出「哪些不完整」、人排序「先補哪個」。
 7. **下游強制**：goal-decomposer 步驟七自檢加一條「archetype baseline 覆蓋」——每個 baseline 區塊（含 L3 媒體槽+後台路徑）要嘛有 owner goal、要嘛在「明確不做」顯式列出。
 
