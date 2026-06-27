@@ -252,3 +252,42 @@ PostToolUse(Write) hook：偵測管線產物檔（`STATE_FINAL.json` / `goal-gra
 ### 參考
 - 實作：specmit `hooks/pipeline-stage-notifier.mjs`（PR #4）。
 - prior-art：GitHub spec-kit 走 build-time 強迫（付可攜代價）；本案走 hook（加法、不犧牲）——同 ADR-001 對 spec-kit 的取捨。
+
+---
+
+## ADR-008｜brownfield「補全」入口 skill（2026-06-27，已實作）
+
+**狀態：** 已實作——`skills/audit-existing-project/SKILL.md`（薄編排層）+ specmit `bin/pipeline.js` 安裝清單加三個檔。消掉 ECOSYSTEM 標的 `connector-needed`。
+
+### 背景 / 問題
+ADR-002（archetype 完備性軸）/ ADR-005（安全 lens）/ ADR-006（audit→修 接力）把 brownfield 體檢的**器官**都長齊了，但**沒有可自動觸發的前門**。具體兩個缺口（ECOSYSTEM `connector-needed` 記的）：
+1. **沒有 skill description 命中「補全 / 體檢 / audit 這個既有專案」**——使用者裝完 `specmit init` 說「請幫我自動補全」，沒有任何 skill 的 description 會匹配，Audit Mode 不會被想起來。
+2. **`modes/audit-mode.md` 不在安裝清單**——就算想起來，裝好的專案裡也沒有那份作業手冊（只有 idea-to-spec / goal-decomposer / specmit 三支進了 `~/.claude/skills/`）。
+
+結果：brownfield 流程**只能靠 agent 直接去 spec-sonar repo 讀 Audit Mode** 才走得到——等於沒接通。from-zero（「我想做一個…」命中 idea-to-spec）是通的，brownfield 不是。
+
+### 決策
+補一支**薄入口 skill** + 把作業手冊一起裝進去：
+1. **`skills/audit-existing-project/SKILL.md`**：description 命中「補全 / 體檢 / 健檢 / audit 既有專案 / 缺什麼 / 有頁沒入口」+「裝完 init 說補全」。讓位規則寫清楚：from-zero → idea-to-spec、單任務 → goal、單 bug → 直接修。**body 是純編排**：偵測能力（AskUserQuestion / project-scanner / house-profile）→ 跑 Audit Mode（暗區四態 + archetype 完備性 + A6 安全 lens）→ A7 triage → AskUserQuestion 問修哪幾個 → 寫 remediation-goals → 接 goal-decomposer（Audit 模式）。
+2. **薄 = 不重寫判準**：skill **讀** `references/audit-mode.md`（= `modes/audit-mode.md` 安裝後位置）+ `../idea-to-spec/references/dark-zone-baseline.md`（sibling 已裝），**不在 skill 內複製** 四態 / baseline / GOLD 清單 / triage 規則——避免第二真相源漂移（同 ADR-002「specmit 不另寫掃描器」的 D2 防雙真相源）。
+3. **specmit 安裝清單（`bin/pipeline.js`）GLOBAL 加三個檔**：`audit-existing-project/SKILL.md`、`modes/audit-mode.md → references/audit-mode.md`、`tools/project-scanner.py → references/project-scanner.py`。dark-zone-baseline 已由 idea-to-spec 那組裝進來，skill 跨 sibling 引用、不重裝。
+4. **specmit 薄 CLI 動詞 `complete`（選配）**：補裝 brownfield 三檔 + 印「開新對話說『幫我補全這個專案』」的下一步指引——CLI affordance，給「裝完不知道怎麼啟動」的人一個按鈕（同 bot 可發現性：能力別藏成隱形指令）。
+
+### 為什麼是這個形狀（關鍵）
+- **入口 skill 是觸發層，不是邏輯層**：Anthropic harness 靠 skill description 自動匹配；ADR-002/005/006 的邏輯都在 `modes/audit-mode.md`（mode 文件、不是 skill、不會被 description 匹配）。所以缺的恰好是「一支 description 對得上 brownfield 意圖、body 只負責把那份 mode 文件叫出來跑」的薄殼。
+- **與 idea-to-spec 對稱**：idea-to-spec 是 from-zero 的觸發前門（description 命中「我想做一個…」）；audit-existing-project 是 brownfield 的觸發前門（命中「補全既有專案」）。兩者共讀同一份 dark-zone-baseline，所以 archetype 完備性軸對兩條路同時生效（ADR-002 §1「一處修、兩模式亮」的觸發側落實）。
+- **裝手冊進 references 是 deployment、不是 fork**：canonical 仍是 `modes/audit-mode.md` / `tools/project-scanner.py`；安裝清單把它們抓到 `~/.claude/skills/audit-existing-project/references/` 是部署副本（同「canonical home / installed copies are deployments」既有模型）。`specmit sync` 會更新。
+
+### 影響面
+- spec-sonar：新增 `skills/audit-existing-project/SKILL.md`（純加法，不動既有 skill / mode）。
+- specmit：`bin/pipeline.js` GLOBAL 清單 +3 行、新增 `complete` 動詞、版本 0.4.1 → 0.4.2；`ECOSYSTEM.md` 移除 `connector-needed` 警告 + 路由表「complete an existing project」改指本 skill。
+
+### ⚠️ 不要改回去
+- **不要**把判準（四態 / archetype baseline / 安全 GOLD / triage）抄進 skill body——薄殼的價值就是不持有判準，抄進來就會跟 mode 文件漂移。
+- **不要**讓 audit-existing-project 接 from-zero 的新想法——那是 idea-to-spec 的領域，description 的讓位規則就是為了不搶。
+- **不要**因為「skill 已裝」就不裝 `audit-mode.md` / `project-scanner.py`——少任一個，裝好的專案裡 skill 叫不出手冊，等於回到 connector-needed。
+
+### 參考
+- 觸發鏈：`audit-existing-project`（本案）→ Audit Mode A0–A7（ADR-002/005/006）→ goal-decomposer（Audit）→ specmit（ADR-004 接力）。
+- ECOSYSTEM 路由：「complete an existing project」/「security-scan a Supabase/web project」。
+- 缺口來源：specmit `ECOSYSTEM.md` 舊版「Known follow-up (`connector-needed`)」段。
