@@ -64,9 +64,9 @@ spec-kit（GitHub 的 spec-driven 開發工具，與本專案近親）在 issue 
 
 ---
 
-## ADR-002｜交付物原型（archetype）完備性軸（2026-06-27，提案）
+## ADR-002｜交付物原型（archetype）完備性軸（2026-06-27）
 
-**狀態：** 提案（design proposal），尚未實作。源於一條「為什麼管線產出後端 90 分、前端 10 分」的端到端診斷對話。
+**狀態：** ✅ 已實作（2026-06-27 下午）——`dark-zone-baseline.md` 加 **M0.5 archetype 分叉樁**（交易型/呈現型/混合，舊 5 型收為交易型子型）+ **類型 F 呈現型網站 baseline**（F-11 標準區塊 / F-12 可達性對稱律 / F-13 信任頁是產品 + L1/L2/L3 完備性階梯）；`goal-decomposer/SKILL.md` 步驟七加「archetype baseline 覆蓋」自檢。Audit Mode 共讀 baseline **自動受惠**。源於一條「為什麼管線產出後端 90 分、前端 10 分」的端到端診斷對話。
 
 ### 背景 / 問題
 實測：把一個 idea 跑過 RequiBridge → idea-to-spec → goal-decomposer → 執行，**跟後端/DB 相關的部分都很順，前端 UI/UX 只有 10 分**。例：做品牌官網，產出 header 只有 2 個選項、沒有「關於我」、有後台卻沒入口可達。
