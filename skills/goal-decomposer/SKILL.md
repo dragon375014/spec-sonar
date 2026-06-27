@@ -233,6 +233,7 @@ STATE_FINAL.known_risks 中前綴「邊界缺口」的條目，是 idea-to-spec 
       跨端驗收先依拆半規則拆開，兩半各有 owner 且 seam 由 G-FINAL 認領，才算通過
 - [ ] 接線矩陣無空格（每個介面：伺服器 handler、客戶端發送方、客戶端接收方都有 owner goal）
 - [ ] 導航表每一條跳轉邊被某個 goal 的驗收條件認領；root route `/` 有 owner（G0）
+- [ ] **archetype baseline 覆蓋**（archetype=呈現型/混合 時）：dark-zone-baseline 類型 F 的每個標準區塊（含其 L3 媒體槽 + 後台填料路徑）要嘛有 owner goal、要嘛在「明確不做」顯式列出；每個宣告的後台/admin 面有可達入口（F-12 對稱律）。交易型專案本項略過
 - [ ] G0 與 G-FINAL 存在；同批次 goal 的產出檔案清單兩兩不重疊
 - [ ] 圖無環，batches 覆蓋全部 goal
 - [ ] 全部 inferred 邊（含推導的導航表）已經用戶確認
