@@ -107,3 +107,32 @@ spec-kit（GitHub 的 spec-driven 開發工具，與本專案近親）在 issue 
 ### 參考
 - N=1 dogfood 目標：真實 90/10 網站碼 `9453americantimetest`。
 - 完整診斷（逐站 10 掉點 + 設計來回）：CS 專案 `文檔/自動化服務飛輪規劃/管線_archetype完備性軸_診斷與修法設計_2026-06-27.md`。
+
+---
+
+## ADR-003｜house-profile 能力閘注入（2026-06-27，已實作於 goal-decomposer）
+
+**狀態：** 已實作，goal-decomposer SKILL.md「步驟零之二 + 契約檔 house-default 規則 + 自檢一條」。ADR-002 §5 的 L3「處理契約」的**值**從這層來。
+
+### 背景 / 問題
+ADR-002 把 L3 升成「填得進去嗎」三問，但留了一個遞迴的洞：粗設計項（「L3 填料路徑」）底下藏一叢細決定（格式 / 尺寸 / 上限 / 裁切 / 離線 / 配額），**靠記性會漏**（實例：8MB 圖直存塞爆 storage = L3 子盲區）。這些細節**因執行者而異、且不該每次重問**——它們是「我這樣做開發」的慣例（house-default），不是公開使用者要的東西。需要一個機制：公開管線能拉執行者私有的慣例知識，但不外洩、不打擾公開使用者。
+
+診斷證據（2026-06-27 對 CS 專案跑唯讀 git 挖掘）：CS 已隱性編碼 **≥7 條跨領域 house-default**（new-db-table RLS+GRANT / payment-callback / manual-trigger / pg-overload-DROP / cross-layer-contract / frontend-no-overwrite-DB-SSOT / migration-apply-lock），全部散在散文 CLAUDE.md / 專案綁定 BLOCKER / prose GOTCHAS 三種**不可注入**形態 = N≥2，值得建。
+
+### 決策
+**公開定插槽、私有放值**：
+1. **機制（公開 goal-decomposer）**：步驟零之二「house-profile 能力閘」——偵測「有沒有」（不是「是不是」，同 ADR-001）。讀順序 ① `./.reuse/house-profile.json`（專案覆寫）② `$HOUSE_PROFILE`（執行者全域）③ 都沒有 → 中性預設、跳過、照常跑（公開使用者走這條）。
+2. **值（私有，不在本 repo）**：house-profile.json = `house_defaults[]`（每條 category / default / `emits_requirement` 路由鍵，同 reuse-manifest）+ `sharp_edges[]`（粗項藏的貴 cluster + 該問的 `ask`）。
+3. **套用**：命中 `emits_requirement` 的 goal → 把 default **烤成具體值**寫進契約 / 前置裁決；命中的 `sharp_edges` → 用 `ask` 補裁決。L3 媒體項的「處理契約」就是 `media-upload` default（格式/最長邊/上限/裁切）。
+
+### 為什麼是這個形狀（關鍵）
+- **能力非身分（同 ADR-001）+ 檔案鬆耦合（同 PIPELINE-CONTRACT）**：house-profile 只是另一個可選輸入檔，有就讀、沒有優雅降級。這是本生態系第三次用同一條 loose-coupling 法則。
+- **防洩邊界**：公開 skill **永不出現 house-profile 來源 repo 的名字**（只認抽象插槽）；house-profile 是本地輸入、執行時讀；生成的 goal 把值烤成具體數字（self-contained）；私有 profile 永不 commit 進公開產物。讀本地、不發佈私有。
+
+### ⚠️ 不要改回去
+- **不要**在公開 skill 寫死任何 house-profile 來源 repo 名 / 具體 default 值——那會把私有慣例洩進公開 repo，且綁死單一使用者。
+- **不要**讓「沒有 house-profile」變成報錯——公開使用者沒有它是正常路徑，必須優雅降級。
+
+### 參考
+- 值的家：執行者私有 reuse-hub（公開 repo 不需知道，故此處不展開）。
+- 完整討論（worth-it 診斷 + 公私分割）：CS 專案 `文檔/自動化服務飛輪規劃/管線完備性工作流_線索分類與狀態_2026-06-27.md` §D/§F。
