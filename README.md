@@ -77,10 +77,11 @@ self-containment · pre-adjudication · literal interface freezing (JSON instanc
 
 ```
 skills/
-  idea-to-spec/            requirement-convergence engine (SKILL.md + references)
+  idea-to-spec/            requirement-convergence engine (SKILL.md + references) — from-zero entry
+  audit-existing-project/  brownfield 補全 / 體檢 entry: triggers Audit Mode → A7 triage → handoff (SKILL.md)
   goal-decomposer/         spec → goal-graph compiler (SKILL.md)
 modes/
-  audit-mode.md            dark-zone detection for existing designs
+  audit-mode.md            dark-zone detection for existing designs (driven by audit-existing-project)
   conflict-analysis-mode.md  skill-ecosystem conflict analysis
 tools/
   project-scanner.py       stdlib-only codebase fingerprinter (<20 KB output)
@@ -119,7 +120,7 @@ The skill instruction files are currently authored in **Traditional Chinese**. T
 
 - [ ] English-native versions of both SKILL.md files
 - [ ] Eval harness: measure dark-zone coverage and goal cold-start pass rate
-- [ ] Audit Mode and Conflict Analysis Mode packaged as runnable skills
+- [x] Audit Mode packaged as a runnable skill — shipped as `skills/audit-existing-project/` (brownfield entry; auto-installed by `specmit init`). Conflict Analysis Mode still pending.
 - [ ] More end-to-end examples (B2B SaaS, marketplace, internal tool)
 - [x] `goal-graph.json` execution runner (auto-dispatch batches to models) — shipped as [specmit](https://github.com/dragon375014/specmit)
 
