@@ -61,3 +61,49 @@ spec-kit（GitHub 的 spec-driven 開發工具，與本專案近親）在 issue 
 - GitHub spec-kit #2181（提案）/ PR #2191（已合併）：https://github.com/github/spec-kit/issues/2181
 - anthropics/claude-code #29547、#29733、#9846、#9912（AskUserQuestion 可靠性）
 - 安裝來源：`npx specmit init` 從各公開 repo 的 **`main`** 分支抓檔（installer `bin/pipeline.js`）。
+
+---
+
+## ADR-002｜交付物原型（archetype）完備性軸（2026-06-27，提案）
+
+**狀態：** 提案（design proposal），尚未實作。源於一條「為什麼管線產出後端 90 分、前端 10 分」的端到端診斷對話。
+
+### 背景 / 問題
+實測：把一個 idea 跑過 RequiBridge → idea-to-spec → goal-decomposer → 執行，**跟後端/DB 相關的部分都很順，前端 UI/UX 只有 10 分**。例：做品牌官網，產出 header 只有 2 個選項、沒有「關於我」、有後台卻沒入口可達。
+
+逐站追蹤發現**管線並不缺前端器官**（用戶旅程維度、兩段邊界掃描、導航表、接線矩陣、G0、G-FINAL 都在）。真正的洞是三層：
+
+- **R1 原型缺口（最根本）**：`dark-zone-baseline.md` 的 5 個類型包（Marketplace/SaaS/消費型/內部工具/ERP）**全是「應用/系統」原型**，**沒有「品牌/內容/呈現型網站」這一類**；11 通用維度幾乎全是後端形狀，唯一碰畫面的「用戶旅程」框成任務漏斗，**沒有 IA/標準區塊/導覽廣度維度**。
+- **R2 完備性是相對的**：導航表/接線矩陣/旅程覆蓋只驗「**已宣告的都到得了**」，不驗「**該有的有沒有**」——沒有一站立 baseline。Garbage-in → verified-garbage-out。
+- **R3 機械驗收偏置**：可機械驗的後端被 scorecard 棘輪推高；前端完備性/IA 不可機械驗 → 沒東西可釘 → 墊底。
+
+**Audit Mode 有同一個盲區**：它與 idea-to-spec 共讀 `dark-zone-baseline`（見 `modes/audit-mode.md`），所以掃 90/10 網站會回報「沒問題」——它看不到「缺關於我頁」，因為沒有維度期待一個關於我頁。
+
+### 決策（提案）
+補一條**交付物原型（archetype）完備性軸**，每個原型自帶「適合它那種表面」的 baseline。**不是把官網版型硬塞進管線**——網頁只是眾原型之一（純 API → DX baseline、自動化 → 執行面、bot → 對話流、列印 → 排版），所以「不能只用網頁當標準」靠設計滿足、非例外。
+
+1. **落點 = `dark-zone-baseline.md`（一處修、兩模式亮）**：from-zero（idea-to-spec 步驟三）與 brownfield（Audit Mode A2）共讀此檔，故 archetype 軸加此處則兩路同時長眼。
+2. **兩層結構**：第一層 M0 modality（已存在，列印在這層）；第二層 archetype 只長在「螢幕」下 = **交易型應用 / 呈現型網站 / 混合**。既有 5 類型包收進「交易型應用」當子類（純加法）。
+3. **判定 = infer-first + 一行確認**：archetype 從 solution_map/前幾輪答案/project-scanner 掃碼**推定**（痛點類別 ≠ archetype，是不同軸），再以 B 類推定句一行確認（猜錯=上線才爆，性質同 M0）。粗類別在 client-facing 端（RequiBridge）即可，深挖子類交執行端。
+4. **呈現型 baseline**：①標準區塊（首頁/關於我/商品服務/內容/聯絡 + 頁尾法務）②可達性對稱律（凡宣告存在的面都要有可抵達入口，含後台）③信任頁是產品不是裝飾。
+5. **三層完備性階梯**：L1 存在 / L2 可達 / **L3 充實**——一個面需要圖/影，就必須同時有**媒體槽**（頁面內圖片/影片區塊）+ **後台填料路徑**（上傳/選圖/儲存）；生成成「一坨文字、沒圖槽、後台無放圖的路」= 不完整。L3 機械可驗（grep 媒體區塊 + admin route），順手修 R3。
+6. **補全模式（brownfield）= 復用 `tools/project-scanner.py` + Audit Mode**（拿 archetype baseline 當尺差集照出缺/薄的面），specmit 僅加薄編排動詞，**不另造掃描器**（防 D2 雙真相源）。掃描照出「哪些不完整」、人排序「先補哪個」。
+7. **下游強制**：goal-decomposer 步驟七自檢加一條「archetype baseline 覆蓋」——每個 baseline 區塊（含 L3 媒體槽+後台路徑）要嘛有 owner goal、要嘛在「明確不做」顯式列出。
+
+### 為什麼是這個形狀（關鍵）
+- **M0 modality 是先例**：它把「靜默假設螢幕」變成「顯式分叉 + 已知缺口」。archetype 是它的姊妹樁——把「靜默假設此案是交易型應用」變成顯式選擇。
+- **同一個結構盲區的第三次出現**（作者自身體系）：Rule 34 反向器官（補往後退）、設計地基模板（補美感軸）、本案（補 IA/媒體完備性軸）——體系對「可機械驗的對」長滿器官、對「完整與否」缺器官。
+
+### 影響面
+- spec-sonar：`dark-zone-baseline.md`（archetype 軸 + 呈現型 baseline + L1/L2/L3）、`goal-decomposer/SKILL.md`（步驟七一條自檢）；Audit Mode 共讀 baseline **自動受惠**。
+- RequiBridge：planner/solution_map 多一個 archetype tag 進 spec-seed。
+- specmit：`bin/` 加薄「補全」動詞。
+
+### ⚠️ 不要改回去
+- **不要**把既有 5 類型包當「全部原型」——它們只是「交易型應用」的子類；漏掉呈現型/混合是本 bug 根因。
+- **不要**在 specmit 內另寫掃描器——掃描器是 project-scanner + Audit Mode，specmit 只編排。
+- **不要**把「導航表/旅程覆蓋通過」當「前端完整」——它們驗的是相對於已宣告 scope 的一致性，不是相對於 archetype baseline 的完備性。
+
+### 參考
+- N=1 dogfood 目標：真實 90/10 網站碼 `9453americantimetest`。
+- 完整診斷（逐站 10 掉點 + 設計來回）：CS 專案 `文檔/自動化服務飛輪規劃/管線_archetype完備性軸_診斷與修法設計_2026-06-27.md`。
