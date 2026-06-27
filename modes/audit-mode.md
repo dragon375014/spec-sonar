@@ -82,3 +82,28 @@ A5 輸出三檔   → dark-zone-findings.md / dependency-conflicts.md / remediat
 
 `clarify` 類 goal 不分配給執行模型——它們是 goal-decomposer 跑之前
 必須由人（或 idea-to-spec 問答）清掉的前置項。
+
+---
+
+## A6 安全 lens（archetype=網頁/Supabase 時加跑；**warn-only 只報不擋**）
+
+<!-- 對應 governance-meta playbooks/supabase-web-security-gate.md。只在 archetype 命中時跑；不命中略過。能力閘讀本地 house-profile.security_context 的 allowlist。 -->
+
+Audit 一個既有 Supabase/網頁專案時，除了暗區四態，**再加跑一遍安全閘**——但**只報不擋**：把 P0~P2 安全 finding 列進報告、**不阻斷**，由人決定要不要修、何時修。
+
+**觸發**：archetype（M0.5）= 網頁 / Supabase / 混合。其他 archetype 略過本 lens。
+
+**掃什麼**（canonical ruleset 在 governance-meta `playbooks/supabase-web-security-gate.md`；未安裝時至少掃下列 advisor 抓不到的 GOLD）：
+- **P0**：RLS 鎖列不鎖欄自我提權（有權限欄的表 + 自更新 policy + 無欄級守衛）；anon 可打無守門 SECURITY DEFINER RPC（`has_function_privilege('anon',oid,'EXECUTE')` + body 無守門）。
+- **P1**：金流信 client 金額 / 簽章 fail-open / supabase-js 寫入靜默失敗 / verify_jwt 沒寫 config.toml / secdef 寫入信 client 資源 id / 前端用 admin-only 資料覆寫 DB SSOT / RLS 用 `auth.uid()`（自訂 JWT）/ JWT secret fail-open。
+- **commodity**：直接吃 Supabase advisor（rls_disabled / security_definer_view / public bucket listing…），**不重造**。
+
+**能力閘讀 allowlist**（偵測有沒有、不是身分；讀順序同 goal-decomposer 步驟零之二：`./.reuse/house-profile.json` ▸ `$HOUSE_PROFILE`）：
+- 有 house-profile 且含 `security_context` → 用 `intentional_exceptions_allowlist` 把命中的 finding 分兩堆：
+  - **✅ 已知已接受**（在 allowlist，附 signed_by/signed_date/review_by）——照列但標明、不當新問題；`review_by` 已過 → 提示「該複查了」。
+  - **🆕 要看一下**（不在 allowlist）——這才是真正要人看的。
+- 沒有 house-profile → 全部當 🆕 列出（公開使用者走這條，照常 warn-only）。
+
+**輸出**：併進 `audit/dark-zone-findings.md` 一個「## 安全 lens（warn-only）」節，每條 = `嚴重度 / 類別 / 證據(檔/表/RPC) / 修法 / 🆕|✅`。**不轉 blocking remediation-goal**——除非人主動把某條升級處理。
+
+> 為什麼 warn-only（決策 2026-06-27）：安全閘第一版**只報不擋**，避免誤報擋流程；allowlist 因此從「擋/放」變成「分 🆕 新 vs ✅ 已決定」，讓人每次只看新出現的。升 fail-closed 是後續決策。
