@@ -269,3 +269,15 @@ STATE_FINAL.known_risks 中前綴「邊界缺口」的條目，是 idea-to-spec 
 檢驗盲審 agent 是否抓得到——這是對「審查程序本身」的突變測試；
 偽造品揭穿後，注意它所佔據的缺口仍須單獨列出（實測發現：
 被識破的偽造品會讓它覆蓋的真缺口被「心理結案」而漏報）。
+
+---
+
+## 步驟八：接力提議（輸出 goal 圖後，能力閘 — ADR-004）
+
+輸出 `goal-graph.json` + `goals/` 並盲審處置完後**主動提議跑管線**，不要讓用戶為了前進而重打「跑管線」。同 ADR-001 能力閘：
+- **有 `AskUserQuestion` 類工具** → 問一題：「goal 圖好了（N 個 goal、M 批、葉節點 K 個）。要現在接力跑完整管線（specmit / idea-to-mvp）嗎？」選項：[建議 — 現在跑（specmit）] / [我先看 goal 圖] / [先停在這]。
+- **沒有** → 文字提議同內容。
+- 用戶選「現在跑」→ **進 specmit**，讀剛輸出的 `goal-graph.json`。
+- 選別的 → 停。
+
+> 為什麼同 idea-to-spec 步驟九：把「使用者重打暗號」的人工接縫換成「主動問下一步」。specmit 是末棒，跑完回報 run-report；outer-loop（BLOCKED / failed / resume）仍回人拍板（刻意人閘，不自動接）。
